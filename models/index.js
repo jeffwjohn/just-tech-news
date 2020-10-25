@@ -1,7 +1,7 @@
 const User = require("./User");
 const Post = require("./Post");
 const Vote = require('./Vote');
-
+const Comment = require("./Comment");
 
 // create associations
 User.hasMany(Post, {
@@ -51,6 +51,28 @@ Post.hasMany(Vote, {
 
 // By also creating one-to-many associations directly between these models, we can perform aggregated SQL functions between models. In this case, we'll see a total count of votes for a single post when queried. This would be difficult if we hadn't directly associated the Vote model with the other two.
 
-module.exports = { User, Post, Vote };
+// Note that we don't have to specify Comment as a through table like we did for Vote. This is because we don't need to access Post through Comment; we just want to see the user's comment and which post it was for. Thus, the query will be slightly different.
+Comment.belongsTo(User, {
+    foreignKey: 'user_id'
+});
+
+Comment.belongsTo(Post, {
+    foreignKey: 'post_id'
+});
+
+User.hasMany(Comment, {
+    foreignKey: 'user_id'
+});
+
+Post.hasMany(Comment, {
+    foreignKey: 'post_id'
+});
+
+module.exports = {
+    User,
+    Post,
+    Vote,
+    Comment
+};
 
 // That's all for the models! Now you can move on to the actual creation of a vote. You may think this will involve a new set of API endpoints at /api/vote, but because a vote belongs to a post, you'll create a new endpoint at /api/post. Doing so will also keep you in line with RESTful API standards.

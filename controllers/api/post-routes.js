@@ -2,7 +2,8 @@ const router = require('express').Router();
 const {
   Post,
   User,
-  Vote
+  Vote,
+  Comment
 } = require('../../models');
 const sequelize = require('../../config/connection');
 
@@ -43,7 +44,19 @@ router.get('/', (req, res) => {
     .then(dbPostData => {
       // pass a single post object into the homepage template
       console.log(dbPostData[0]);
-      res.render('homepage', dbPostData[0]);
+      // res.render('homepage', dbPostData[0]);
+
+      // The data that Sequelize returns is actually a Sequelize object with a lot more information attached to it than you might have been expecting. To serialize the object down to only the properties you need, you can use Sequelize's get() method.
+
+      // res.render('homepage', dbPostData[0].get({ plain: true }));
+
+      // This is starting to come together, but we're only accommodating one post. We need the entire array of posts to be in the template. That also means we'll need to serialize the entire array. Add the following line of code before the render() happens:
+      const posts = dbPostData.map(post => post.get({ plain: true }));
+      // This will loop over and map each Sequelize object into a serialized version of itself, saving the results in a new posts array. Now we can plug that array into the template. However, even though the render() method can accept an array instead of an object, that would prevent us from adding other properties to the template later on. To avoid future headaches, we can simply add the array to an object and continue passing an object to the template.
+      // Update the render() method so it matches what's shown in the following code:
+      res.render('homepage', { posts });
+      //This will momentarily break the template again, because the template was set up to receive an object with an id property, title property, and so on. Now the only property it has access to is the posts array. Fortunately, Handlebars.js has built-in helpers that will allow you to perform minimal logic like looping over an array.
+
     })
     .catch(err => {
       console.log(err);
