@@ -9,6 +9,7 @@ const { Post, User, Comment } = require('../models');
 
 // The res.render() method can accept a second argument, an object, which includes all of the data you want to pass to your template.
 router.get('/', (req, res) => {
+    console.log(req.session);
     res.render('homepage', {
       id: 1,
       post_url: 'https://handlebarsjs.com/guide/',
@@ -22,4 +23,12 @@ router.get('/', (req, res) => {
     });
   });
   
+  router.get('/login', (req, res) => {
+    if (req.session.loggedIn) {
+        res.redirect('/');
+        return;
+      }
+    res.render('login');
+  });
+  // What's different about this render() from last time? Our login page doesn't need any variables, so we don't need to pass a second argument to the render() method.
 module.exports = router;
