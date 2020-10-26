@@ -19,7 +19,7 @@
     
 The main.handlebars file used three curly brackets as {{{ body }}}, but here we're only using two brackets as {{ title }}. Why is that? The difference is that two brackets will convert HTML characters to strings. For instance, < would become &lt;. Three brackets, on the other hand, will render the data as HTML.--}}
 
-<ol class="post-list">
+{{!-- <ol class="post-list">
   {{#each posts}}
   <li>
     <article class="post">
@@ -36,7 +36,8 @@ The main.handlebars file used three curly brackets as {{{ body }}}, but here we'
     </article>
   </li>
   {{/each}}
-</ol>
+</ol> --}}
+
 {{!-- Note the use of {{#each}} to begin the loop and {{/each}} to define where it ends. Any HTML code in between (e.g., the <li> element) will be repeated for every item in posts. Refresh the page, and you might be surprised to see that it already works. If you have several posts in your database, your homepage will look similar to the following image: --}}
 
 {{!-- Within the {{#each}} block, Handlebars.js is smart enough to know that it's working with an object on each iteration, so it looks for the necessary properties. We can make this a little clearer, however, by declaring a variable name in the {{#each}} expression and using that name for the subsequent placeholders.
