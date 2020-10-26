@@ -7,7 +7,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const exphbs = require('express-handlebars');
-const hbs = exphbs.create({});
+const helpers = require('./utils/helpers');
+// const hbs = exphbs.create({});
+const hbs = exphbs.create({ helpers });
 
 // The express-session library allows us to connect to the back end. The connect-session-sequelize library automatically stores the sessions created by express-session into our database.
 const session = require('express-session');
