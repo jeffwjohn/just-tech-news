@@ -11,7 +11,8 @@ test('format_date() returns a date string', () => {
 
 test('format_plural() correctly pluralizes words', () => {
 const word = new String('word');
-    expect(format_plural(word)).toBe('words');
+    expect(format_plural('word', 1)).toBe('word');
+    expect(format_plural('word', 2)).toBe('words');
 });
 
 test('format_url() returns a simplified url string', () => {
