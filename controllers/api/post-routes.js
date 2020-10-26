@@ -114,36 +114,51 @@ router.post('/', (req, res) => {
 // PUT /api/posts/upvote. Make sure this PUT route is defined before the /:id PUT route, though. Otherwise, Express.js will think the word "upvote" is a valid parameter for /:id. An upvote request will differ somewhat from the PUT requests we've created before. It will involve two queries: first, using the Vote model to create a vote, then querying on that post to get an updated vote count.
 
 
+// router.put('/upvote', (req, res) => {
+//   // create the vote
+//   Vote.create({
+//     user_id: req.body.user_id,
+//     post_id: req.body.post_id
+//   }).then(() => {
+//     // then find the post we just voted on
+//     return Post.findOne({
+//         where: {
+//           id: req.body.post_id
+//         },
+//         // We just updated the route to query on the post we voted on after the vote was created. As we do so, we want to tally up the total number of votes that post has. Under some circumstances, built-in Sequelize methods can do just that—specifically one called .findAndCountAll(). Unfortunately, because we're counting an associated table's data and not the post itself, that method won't work here.
+//         attributes: [
+//           'id',
+//           'post_url',
+//           'title',
+//           'created_at',
+//           // use raw MySQL aggregate function query to get a count of how many votes the post has and return it under the name `vote_count`
+//           [
+//             sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
+//             'vote_count'
+//           ]
+//         ]
+//       })
+//       .then(dbPostData => res.json(dbPostData))
+//       .catch(err => {
+//         console.log(err);
+//         res.status(400).json(err);
+//       });
+//   });
+// });
+// We're doing two things here (below). First, we're checking that a session exists before we even touch the database. Then if a session does exist, we're using the saved user_id property on the session to insert a new record in the vote table.
+
+// This means that the upvote feature will only work if someone has logged in, so you should log in with a test account on the front end if you haven't already. The first time you click the upvote button, the page will refresh, and the comment count will have gone up by one. Success! If you click the button a second time, however, you'll get an error, because the Sequelize relationships don't allow duplicate entries:
 router.put('/upvote', (req, res) => {
-  // create the vote
-  Vote.create({
-    user_id: req.body.user_id,
-    post_id: req.body.post_id
-  }).then(() => {
-    // then find the post we just voted on
-    return Post.findOne({
-        where: {
-          id: req.body.post_id
-        },
-        // We just updated the route to query on the post we voted on after the vote was created. As we do so, we want to tally up the total number of votes that post has. Under some circumstances, built-in Sequelize methods can do just that—specifically one called .findAndCountAll(). Unfortunately, because we're counting an associated table's data and not the post itself, that method won't work here.
-        attributes: [
-          'id',
-          'post_url',
-          'title',
-          'created_at',
-          // use raw MySQL aggregate function query to get a count of how many votes the post has and return it under the name `vote_count`
-          [
-            sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
-            'vote_count'
-          ]
-        ]
-      })
-      .then(dbPostData => res.json(dbPostData))
+  // make sure the session exists first
+  if (req.session) {
+    // pass session id along with all destructured properties on req.body
+    Post.upvote({ ...req.body, user_id: req.session.user_id }, { Vote, Comment, User })
+      .then(updatedVoteData => res.json(updatedVoteData))
       .catch(err => {
         console.log(err);
-        res.status(400).json(err);
+        res.status(500).json(err);
       });
-  });
+  }
 });
 
 router.put('/:id', (req, res) => {
